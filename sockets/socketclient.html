@@ -30,16 +30,20 @@
   </nav>
   <div class="container-fluid">
     <div class="row">
-      <div class="col-sm-6" id="divi">
+      <div class="col-sm-6" >
         <h3>Continious Data</h3>
         <div class="form-group">
-          <div class="row">
+          <div class="row com-margin-btm">
             <div class="col-sm-6">
               <input type="text" class="form-control" id="someInput" name="someInput" placeholder="Enter Message"
                 name="pwd">
             </div>
             <div class="col-sm-6">
               <button type="submit" class="btn btn-primary" onclick="myFunction()">Submit</button>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-12" id="divi">
             </div>
           </div>
         </div>
@@ -51,13 +55,13 @@
         </div>
         <div id="video" class="hide">
             <h3>Peeling is going on</h3>
-          <video autoplay controls id="vid">
+          <video loop controls id="vid">
             <source src="../images/video.mp4" type="video/mp4">
           </video>
         </div>
         <div id="packing" class="hide">
             <h3>Package is going on</h3>
-          <img src="../images/packagePPT.png" width="100%" height="300px">
+          <img src="../images/packagePPT.png" width="100%" height="700px">
         </div>
 
       </div>
@@ -99,7 +103,7 @@
     divPanelBody.appendChild(text);
 
     var element = document.getElementById("divi");
-    element.appendChild(divPanel);
+    element.prepend(divPanel);
   }
 
   function showContentsOnRunTime(workflowName) {
