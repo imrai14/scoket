@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
+        integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+
+
+    <style>
+        html,body{
+            height:100%;
+        }
+        .node circle {
+            fill: #41aaaa;
+            stroke: #41aaaa;
+            stroke-width: 1px;
+        }
+
+        .node text {
+            font: 16px sans-serif;
+        }
+
+        .link {
+            fill: none;
+            stroke: #ccc;
+            stroke-width: 2px;
+        }
+        .tooltip {
+        position: absolute;
+        height: auto;
+        padding: 5px 10px;
+        background-color: rgba(20, 20, 20, 0.8);
+        pointer-events: none;
+        z-index: 9999;
+        display: none;
+
+    }
+
+    .value {
+        margin: 0;
+        font-family: sans-serif;
+        font-size: 12px;
+        line-height: 1.1em;
+        color: #ffffff;
+    }
+
+    .hide {
+        display: none;
+    }
+
+    .show {
+        display: block;
+    }
+    </style>
+</head>
+
+<body>
+        <div class="tooltip">
+                <span class="value"></span>
+            </div>
+    <script language="javascript">
+        var treeData = [{
+            "name": "Farmer",
+            "parent": "null",
+            "children": [{
+                "name": "Plant",
+                "parent": "Persons",
+                "children": [{
+                    "name": "Production/peeling",
+                    "parent": "Country of residence",
+                    "children": [
+                        {
+                            "name": "Transport",
+                            "parent": "Country of residence",
+                            "children": [{
+                                "name": "Storage",
+                                "parent": "Country of residence",
+                                "children": [{
+                                    "name": "Eating",
+                                    "parent": "Country of residence"
+                                }]
+                            }]
+                        }
+                    ]
+                },]
+            }]
+        }];
+
+        // ************** Generate the tree diagram  *****************
+        var margin = {
+            top: 20,
+            right: 120,
+            bottom: 20,
+            left: 120
+        },
+            width = 1060 - margin.right - margin.left,
+            height = 500 - margin.top - margin.bottom;
+
+        var i = 0;
+
+        var tree = d3.layout.tree().size([height, width]);
+
+        var diagonal = d3.svg.diagonal()
+            .projection(function (d) {
+                return [d.y, d.x];
+            });
+
+        var line = d3.svg.line()
+            .x(function (d) {
+                return d.y;
+            })
+            .y(function (d) {
+                return d.x;
+            });
+
+        var svg = d3.select("body").append("svg")
+            .attr("width", '100%')
+            .attr("height", '100%')
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+
+        root = treeData[0];
+
+        update(root);
+
+        function update(source) {
+
+            // Compute the new tree layout.
+            var nodes = tree.nodes(root).reverse(),
+                links = tree.links(nodes);
+
+            // Normalize for fixed-depth.
+            nodes.forEach(function (d) {
+                d.y = d.depth * 180;
+            });
+
+            // Declare the nodesâ€¦
+            var node = svg.selectAll("g.node")
+                .data(nodes, function (d) {
+                    return d.id || (d.id = ++i);
+                });
+
+            // Enter the nodes.
+            var nodeEnter = node.enter().append("g")
+                .attr("class", "node")
+                .attr("transform", function (d) {
+                    return "translate(" + d.y + "," + d.x + ")";
+                }).on('mousemove', (datum, index) => {
+                    d3.select('.tooltip').attr('class', 'tooltip show').
+                        style('left', `${d3.event.layerX + 20}px`)
+                        .style('top', `${d3.event.layerY + 10}px`)
+                        .select('.value')
+                        .text(()=>datum.name);
+                })
+                .on('mouseout', () => {
+                    d3.selectAll('.tooltip').attr('class', 'tooltip hide');
+                });
+
+            nodeEnter.append("rect")
+                .attr("rx", 6)
+                .attr("ry", 6)
+                .attr("x", -12.5)
+                .attr("y", -12.5)
+                .attr("width", 105)
+                .attr("height", 35)
+                .style("fill", "#41aaaa");
+
+
+            nodeEnter.append("text")
+                .attr("x", function (d) {
+                    return d.children || d._children ? 0 : 15;
+                })
+                .attr("y", function (d) {
+                    return d.children || d._children ? 40 : 40;
+                })
+                .attr("dy", ".35em")
+                .attr("text-anchor", function (d) {
+                    return d.children || d._children ? "start" : "start";
+                })
+                .text(function (d) {
+                    return d.name;
+                })
+                .style("fill-opacity", 1);
+
+            // Declare the linksâ€¦
+            var link = svg.selectAll("path.link")
+                .data(links, function (d) {
+                    return d.target.id;
+                });
+
+            // Enter the links.
+            link.enter().insert("path", "g")
+                .attr("class", "link")
+                .attr("d", function (d) { return line([d.source, d.target]) });
+
+
+        }
+    </script>
+</body>
+</body>
+
+</html>

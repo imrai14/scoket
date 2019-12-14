@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>WebSocket Playground</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../styles/main.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark static-top nav-header">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-4">
+          <a class="navbar-brand" href="#">
+            <img src="../images/siemens_logo.png" alt="">
+          </a>
+
+        </div>
+        <div class="col-sm-8">
+          <h2 class="pull-right">FB Track and Trace</h2>
+        </div>
+      </div>
+
+    </div>
+  </nav>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-sm-6" id="divi">
+        <h3>Continious Data</h3>
+        <div class="form-group">
+          <div class="row">
+            <div class="col-sm-6">
+              <input type="text" class="form-control" id="someInput" name="someInput" placeholder="Enter Message"
+                name="pwd">
+            </div>
+            <div class="col-sm-6">
+              <button type="submit" class="btn btn-primary" onclick="myFunction()">Submit</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-sm-6">
+        <div id="map" class="hide">
+          <h3>Map Details</h3>
+        </div>
+        <div id="video" class="hide">
+            <h3>Peeling is going on</h3>
+          <video autoplay controls id="vid">
+            <source src="../images/video.mp4" type="video/mp4">
+          </video>
+        </div>
+        <div id="packing" class="hide">
+            <h3>Package is going on</h3>
+          <img src="../images/packagePPT.png" width="100%" height="300px">
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+
+
+  <div id="map">
+
+  </div>
+</body>
+
+
+<script>
+  const ws = new WebSocket('ws://localhost:9898/');
+  if (ws) {
+    console.log(ws);
+  }
+
+  function createUIDynamically(x) {
+
+    // checkObjectContainesKey(JSON.parse(x), 'workflow')
+    // console.log(data);
+    let divPanel = document.createElement('div');
+    divPanel.classList.add('panel');
+    divPanel.classList.add('panel-default');
+
+    let divPanelBody = document.createElement('div');
+    divPanelBody.classList.add('panel-body');
+    divPanelBody.classList.add('break-word');
+
+    divPanel.appendChild(divPanelBody);
+
+
+    let text = document.createTextNode(x);
+
+    divPanelBody.appendChild(text);
+
+    var element = document.getElementById("divi");
+    element.appendChild(divPanel);
+  }
+
+  function showContentsOnRunTime(workflowName) {
+    console.log('workflowName-------->',workflowName)
+    let elementMap = document.getElementById("map");
+    let elementVideo = document.getElementById("video");
+    let elementPacking = document.getElementById("packing");
+
+    if (workflowName === 'Dispatch') {
+      elementMap.classList.remove("hide");
+      elementVideo.classList.add("hide");
+      elementPacking.classList.add("hide");
+    } else if (workflowName === 'Peel') {
+      elementVideo.classList.remove("hide");
+      document.getElementById('vid').play();
+      elementMap.classList.add("hide");
+      elementPacking.classList.add("hide");
+
+    } else if (workflowName === 'Package') {
+      elementPacking.classList.remove("hide");
+      elementVideo.classList.add("hide");
+      elementMap.classList.add("hide");
+    } else {
+      console.log('something error')
+    }
+  }
+
+
+  function myFunction() {
+    var x = document.getElementById("someInput").value;
+    // console.log('x', JSON.parse(x))
+    createUIDynamically(x)
+
+
+
+    ws.send(x);
+  }
+
+  function checkObjectContainesKey(myObj, key) {
+    if (key in myObj) {
+      return myObj[key]
+    }
+  }
+  //websocket start
+  var socketData;
+  ws.onmessage = function (e) {
+    var para = document.createElement("p");
+    //global datasource
+    console.log("Received: '" + JSON.parse(e.data) + "'");
+    socketData = JSON.parse(e.data);
+
+    var socketDataString = JSON.parse(JSON.stringify(e.data));
+    console.log('socketdata' + socketData['workflow']);
+    //UI update logic
+    createUIDynamically(JSON.stringify(e.data));
+    showContentsOnRunTime(socketData['workflow'])
+    // var node = document.createTextNode(socketDataString);
+    // para.appendChild(node);
+
+    // var element = document.getElementById("divi");
+    // element.appendChild(para);
+    loadDispatchPage();
+  };
+  //websocket end
+</script>
+
+<script>
+  //dispatch movable truck
+  var map;
+  var markerDispatchArray = [];
+  var markerDispatchCoordinates = [];
+
+  function loadDispatchPage() {
+    console.log('array' + markerDispatchArray.length);
+    console.log('workflow' + socketData.workflow);
+    if (socketData !== undefined && socketData.workflow === 'Dispatch') {
+      if (markerDispatchArray.length == 0) {
+        var head = document.getElementsByTagName('head')[0];
+        var js = document.createElement("script");
+        js.type = "text/javascript";
+        js.src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyC_ZuqzDOlM1aapxFq_cmpKxftSdVvaOOc&callback=initMap";
+        head.appendChild(js);
+      } else {
+        var googleLatLong = new google.maps.LatLng(socketData.coordinates.latitude, socketData.coordinates.longitude);
+
+        if (socketData.temperatureStatus == 'Bad') {
+          marker = createMarker(googleLatLong, map, "B");
+          var label = marker.getLabel();
+          label.color = "red";
+          label.text = "B";
+          marker.setLabel(label);
+          var infowindow = new google.maps.InfoWindow({
+            content: "asset temp " + socketData.temperature
+          });
+          infowindow.open(map, marker);
+        } else {
+          marker = createMarker(googleLatLong, map, "G");
+          var label = marker.getLabel();
+          console.log(label);
+          label.color = "white";
+          label.text = "G";
+          marker.setLabel(label);
+        }
+        var flightPath = new google.maps.Polyline({
+          path: markerDispatchCoordinates,
+          strokeColor: "#FF0000",
+          strokeOpacity: 1.0,
+          strokeWeight: 2
+        });
+        flightPath.setMap(map);
+      }
+    }
+  }
+
+  function initMap() {
+
+    console.log(markerDispatchArray.length);
+    console.log(socketData.workflow);
+
+    if (socketData !== undefined && socketData.coordinates !== undefined) {
+      var googleLatLong = new google.maps.LatLng(socketData.coordinates.latitude, socketData.coordinates.longitude);
+      if (markerDispatchArray.length == 0) {
+        map = new google.maps.Map(document.getElementById('map'), {
+          center: googleLatLong,
+          zoom: 15
+        });
+        marker = createMarker(googleLatLong, map, "G");
+      }
+    }
+  }
+
+  function createMarker(googleLatLong, map, label) {
+    var markerOptions = {
+      position: googleLatLong,
+      map: map,
+      clickable: true,
+      label: label
+    }
+    var marker = new google.maps.Marker(markerOptions);
+    //map.setCenter(googleLatLong);
+    markerDispatchArray.push(marker);
+    markerDispatchCoordinates.push(googleLatLong);
+    return marker;
+  }
+
+  function loadStaticMap() {
+    var googleLatLong = new google.maps.LatLng(37.77629613961063, -122.41644409956226)
+    map = new google.maps.Map(document.getElementById('map'), {
+      center: googleLatLong,
+      zoom: 20
+    });
+
+
+
+    var googleLatLong2 = new google.maps.LatLng(37.77629613961063, -122.41644409956226)
+    var markerOptions = {
+      position: googleLatLong2,
+      map: map,
+      clickable: true,
+      draggable: true
+    }
+    var marker = new google.maps.Marker(markerOptions);
+
+    var googleLatLong3 = new google.maps.LatLng(37.77924260798748, -122.41414432988985)
+    var markerOptions = {
+      position: googleLatLong3,
+      map: map,
+      clickable: true,
+      draggable: true
+    }
+    var marker = new google.maps.Marker(markerOptions);
+
+    // var googleLatLong4 = new google.maps.LatLng(-34.10397,150.32644)
+    // var markerOptions = {position:googleLatLong3,map:map,clickable:true,draggable:true}
+    // var marker = new google.maps.Marker(markerOptions);
+
+    var googleLatLong5 = new google.maps.LatLng(37.77413704276741, -122.41542682726455)
+    var markerOptions = {
+      position: googleLatLong5,
+      map: map,
+      clickable: true,
+      draggable: true
+    }
+    var marker = new google.maps.Marker(markerOptions);
+
+  }
+</script>
+
+
+<!-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCtO-fEMb1j9m3WBM0AYjSMg6DAA9sbHrA&callback=initMap"
+    async defer></script> -->
+
+</html>
