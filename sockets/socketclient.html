@@ -107,6 +107,7 @@
 
     var element = document.getElementById("divi");
     element.prepend(divPanel);
+    showContentsOnRunTime(x)
   }
 
   function showContentsOnRunTime(workflowName) {
@@ -121,20 +122,30 @@
       elementMap.classList.remove("hide");
       elementVideo.classList.add("hide");
       elementPacking.classList.add("hide");
+      dynamicImage.classList.add("hide");
     } else if (workflowName === 'Peel') {
       elementVideo.classList.remove("hide");
       document.getElementById('vid').play();
       elementMap.classList.add("hide");
       elementPacking.classList.add("hide");
+      dynamicImage.classList.add("hide");
+
 
     } else if (workflowName === 'Package') {
       elementPacking.classList.remove("hide");
       elementVideo.classList.add("hide");
       elementMap.classList.add("hide");
-    } else if (workflowName === 'Mangos') {
-      elementPacking.classList.remove("hide");
+      dynamicImage.classList.add("hide");
+
+    } else if (workflowName === 'Mangos' || workflowName === 'Graph' || workflowName === 'Land' || workflowName ===
+      'Farmer') {
+      dynamicImage.classList.remove("hide");
+      imageId.src = socketData.path;
       elementVideo.classList.add("hide");
       elementMap.classList.add("hide");
+      elementPacking.classList.add("hide");
+
+
     } else {
       console.log('something error')
     }
