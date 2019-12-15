@@ -103,6 +103,7 @@
 
     let text = document.createTextNode(x);
 
+    // divPanelBody.innerHTML("<pre> <code>"+text+"</pre> </code>");
     divPanelBody.appendChild(text);
 
     var element = document.getElementById("divi");
@@ -138,14 +139,16 @@
       dynamicImage.classList.add("hide");
 
     } else if (workflowName === 'Mangos' || workflowName === 'Graph' || workflowName === 'Land' || workflowName ===
-      'Farmer') {
+      'Farmer' || workflowName === 'StorePackage') {
       dynamicImage.classList.remove("hide");
-      imageId.src = socketData.path;
+      imageId.src = socketData.path + '?' + Date.now();
       elementVideo.classList.add("hide");
       elementMap.classList.add("hide");
       elementPacking.classList.add("hide");
 
 
+    } else if (workflowName === 'Refresh') {
+      window.location.reload();
     } else {
       console.log('something error')
     }
@@ -156,8 +159,6 @@
     var x = document.getElementById("someInput").value;
     // console.log('x', JSON.parse(x))
     createUIDynamically(x)
-
-
 
     ws.send(x);
   }
