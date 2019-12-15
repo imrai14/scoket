@@ -93,11 +93,30 @@ app.get('/package', (req, res) => {
     res.end();
 });
 
-
+var virusAffected = {
+    workflow:"fda",
+    "startingFarm" : {"latitude":24.879999 , "longitude":74.629997},
+    "citieswithinfectedFarm":10,
+    "packagessold":2000,
+    "packageavaialble":1500,
+    "virus":"Zika",
+    "infectionSite": {latitude:28.440554,longitude:74.493011},
+    "shops" : 
+    [
+        {shop: "Store 1",latitude: 16.994444, longitude:73.300003,sold: 200,contact:98861098947},
+        {shop: "Store 2",latitude: 19.155001,longitude:72.849998,sold: 200,contact:98861098947},
+        {shop: "Store 5",latitude: 28.610001,longitude:77.230003,sold: 200,contact:98861098947},
+        {shop: "Store 6",latitude: 19.07609,longitude:72.877426,sold: 200,contact:98861098947},
+        {shop: "Store 7",latitude: 14.16704,longitude:75.040298,sold: 200,contact:98861098947},
+        {shop: "Store 8",latitude: 26.540457,longitude:88.719391,sold: 200,contact:98861098947},
+        {shop: "Store 9",latitude: 24.633568,longitude:87.849251,sold: 200,contact:98861098947},
+    
+    ]
+}
 
 app.post('/fda', (req, res) => {
 
-    connection.send(JSON.stringify(req.body));
+    connection.send(JSON.stringify(virusAffected));
     res.end();
 
 });
@@ -172,6 +191,7 @@ console.log(temperature);
       })
       .catch((error) => {
         console.error(error)
+        return "Error reaching anamoly";
       })
      // return res;
 }

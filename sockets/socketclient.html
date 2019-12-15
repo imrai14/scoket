@@ -135,7 +135,12 @@
       elementPacking.classList.remove("hide");
       elementVideo.classList.add("hide");
       elementMap.classList.add("hide");
-    } else {
+    } else if (workflowName == "fda") {
+      elementPacking.classList.add("hide");
+      elementVideo.classList.add("hide");
+      elementMap.classList.remove("hide");
+    }
+    else {
       console.log('something error')
     }
   }
@@ -174,12 +179,79 @@
 
     // var element = document.getElementById("divi");
     // element.appendChild(para);
+    loadFdaMap();
+
     loadDispatchPage();
   };
   //websocket end
 </script>
 
 <script>
+  //fdaWorkflow
+  function loadFdaMap() {
+    console.log('fda map called')
+    if (socketData !== undefined && socketData.workflow !== undefined && socketData.workflow === 'fda') {
+      // var head = document.getElementsByTagName('head')[0];
+      // var js = document.createElement("script");
+      // js.type = "text/javascript";
+      // js.src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyC_ZuqzDOlM1aapxFq_cmpKxftSdVvaOOc&callback=initMap";
+      // head.appendChild(js);
+      if(map === undefined){
+        var googleLatLong = new google.maps.LatLng(socketData.startingFarm.latitude, socketData.startingFarm.longitude);
+        map = new google.maps.Map(document.getElementById('map'), {
+              center: googleLatLong,
+              zoom: 5
+            });
+      }
+      for (let index = 0; index < socketData.shops.length; index++) {
+        const shop = socketData.shops[index]
+        var googleLatLong = new google.maps.LatLng(shop.latitude, shop.longitude);
+        var marker = createMarker(googleLatLong, map, "S");
+        // var infowindow = new google.maps.InfoWindow({
+        //   content: "name:" + shop.shop + '\b' + +"packages sold : " + shop.sold + '\b'
+        // });
+        // infowindow.open(map, marker);
+      }
+
+      var googleLatLong = new google.maps.LatLng(socketData.startingFarm.latitude, socketData.startingFarm.longitude);
+      var originmarker =createMarker(googleLatLong, map, "O");
+      var infowindow = new google.maps.InfoWindow({
+        content: "Source Farm location"
+      });
+      infowindow.open(map, originmarker);
+
+      var googleLatLong = new google.maps.LatLng(socketData.infectionSite.latitude, socketData.infectionSite.longitude);
+      var infectionMarker = createMarker(googleLatLong, map, "I");
+      var infowindow = new google.maps.InfoWindow({
+        content: "virus diagnosed:" + "Zika"
+      });
+      infowindow.open(map, infectionMarker);
+    }
+  }
+
+  //load customer map
+
+  // function loadCustomerMap() {
+  //   if (socketData !== undefined && socketData.workflow !== undefined && socketData.workflow === 'customer') {
+  //     var head = document.getElementsByTagName('head')[0];
+  //     var js = document.createElement("script");
+  //     js.type = "text/javascript";
+  //     js.src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyC_ZuqzDOlM1aapxFq_cmpKxftSdVvaOOc&callback=initMap";
+  //     head.appendChild(js);
+
+  //     for (let index = 0; index < socketData.shops.length; index++) {
+  //       const shop = socketData.shops[i]
+  //       var googleLatLong = new google.maps.LatLng(shop.latitude, shop.longitude);
+  //       var marker = createMarker(googleLatLong, map, "S");
+  //       var infowindow = new google.maps.InfoWindow({
+  //         content: "name:" + shop.shop + '\b' + +"packages sold : " + shop.sold + '\b' + 'contact : ' + shop.contact
+  //       });
+  //       infowindow.open(map, marker);
+  //     }
+    
+  //   }
+  // }
+
   //dispatch movable truck
   var map;
   var markerDispatchArray = [];
@@ -190,32 +262,53 @@
     console.log('workflow' + socketData.workflow);
     if (socketData !== undefined && socketData.workflow === 'Dispatch') {
       if (markerDispatchArray.length == 0) {
-        var head = document.getElementsByTagName('head')[0];
-        var js = document.createElement("script");
-        js.type = "text/javascript";
-        js.src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyC_ZuqzDOlM1aapxFq_cmpKxftSdVvaOOc&callback=initMap";
-        head.appendChild(js);
+        if (socketData !== undefined && socketData.coordinates !== undefined) {
+          var googleLatLong = new google.maps.LatLng(socketData.coordinates.latitude, socketData.coordinates.longitude);
+          if (markerDispatchArray.length == 0) {
+            map = new google.maps.Map(document.getElementById('map'), {
+              center: googleLatLong,
+              zoom: 15
+            });
+            marker = createMarker(googleLatLong, map, "G");
+          }
+        }
+        // var head = document.getElementsByTagName('head')[0];
+        // var js = document.createElement("script");
+        // js.type = "text/javascript";
+        // js.src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyC_ZuqzDOlM1aapxFq_cmpKxftSdVvaOOc&callback=initMap";
+        // head.appendChild(js);
       } else {
         var googleLatLong = new google.maps.LatLng(socketData.coordinates.latitude, socketData.coordinates.longitude);
-
-        if (socketData.temperatureStatus == 'Bad') {
-          marker = createMarker(googleLatLong, map, "B");
+        if (socketData.temperatureStatus === 'Error') {
+          marker = createMarker(googleLatLong, map, "E");
           var label = marker.getLabel();
           label.color = "red";
-          label.text = "B";
+          label.text = "E";
           marker.setLabel(label);
           var infowindow = new google.maps.InfoWindow({
-            content: "asset temp " + socketData.temperature
+            content: "error temp " + socketData.temperature
           });
           infowindow.open(map, marker);
-        } else {
+        } else if(socketData.temperatureStatus === 'Good') {
           marker = createMarker(googleLatLong, map, "G");
           var label = marker.getLabel();
           console.log(label);
           label.color = "white";
           label.text = "G";
           marker.setLabel(label);
+        }else if(socketData.temperatureStatus === 'Warning') {
+          marker = createMarker(googleLatLong, map, "W");
+          var label = marker.getLabel();
+          console.log(label);
+          label.color = "yellow";
+          label.text = "Y";
+          marker.setLabel(label);
+          var infowindow = new google.maps.InfoWindow({
+            content: "warning temp " + socketData.temperature
+          });
         }
+
+
         var flightPath = new google.maps.Polyline({
           path: markerDispatchCoordinates,
           strokeColor: "#FF0000",
@@ -229,19 +322,18 @@
 
   function initMap() {
 
-    console.log(markerDispatchArray.length);
-    console.log(socketData.workflow);
-
-    if (socketData !== undefined && socketData.coordinates !== undefined) {
-      var googleLatLong = new google.maps.LatLng(socketData.coordinates.latitude, socketData.coordinates.longitude);
-      if (markerDispatchArray.length == 0) {
-        map = new google.maps.Map(document.getElementById('map'), {
-          center: googleLatLong,
-          zoom: 15
-        });
-        marker = createMarker(googleLatLong, map, "G");
-      }
-    }
+    console.log('init');
+    //might be needed later
+    // if (socketData !== undefined && socketData.coordinates !== undefined) {
+    //   var googleLatLong = new google.maps.LatLng(socketData.coordinates.latitude, socketData.coordinates.longitude);
+    //   if (markerDispatchArray.length == 0) {
+    //     map = new google.maps.Map(document.getElementById('map'), {
+    //       center: googleLatLong,
+    //       zoom: 15
+    //     });
+    //     marker = createMarker(googleLatLong, map, "G");
+    //   }
+    // }
   }
 
   function createMarker(googleLatLong, map, label) {
@@ -302,7 +394,7 @@
 </script>
 
 
-<!-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCtO-fEMb1j9m3WBM0AYjSMg6DAA9sbHrA&callback=initMap"
-    async defer></script> -->
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC2QQeYf0sJgU95YhZUamJf4sBxnexO62E&callback=initMap" async
+  defer></script>
 
 </html>
