@@ -273,3 +273,18 @@ app.get('/storepackage', (req, res) => {
     connection.send(JSON.stringify({ "workflow": "StorePackage" }));
     return res.send({ message: "OK" });
 })
+
+app.post('/sendqrcode', (req, res) => {
+    var base64Data = JSON.parse(JSON.stringify(req.body))
+
+    // req.body.workflow = 'QRcode'
+    let reqdata = base64Data.str;
+    let splitData = reqdata.split("base64,");
+    //console.log("string is:" + base64Data.str)
+    require("fs").writeFile("C:/Users/Z003YYZA/Desktop/F&B/Deployment_images/qr.png",splitData[1], 'base64', function (err) {
+        console.log("Error:" + err);
+    });
+    connection.send(JSON.stringify({"workflow" : "QRcode", "path": "C:\\Users\\Z003YYZA\\Desktop\\F&B\\Deployment_images\\qr.png"}))
+    return res.send({message:"OK"}); 
+ 
+ });

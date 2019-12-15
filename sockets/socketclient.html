@@ -140,9 +140,9 @@
       dynamicImage.classList.add("hide");
 
     } else if (workflowName === 'Mangos' || workflowName === 'Graph' || workflowName === 'Land' || workflowName ===
-      'Farmer' || workflowName === 'StorePackage') {
+      'Farmer' || workflowName === 'StorePackage' || workflowName === 'QRcode') {
       dynamicImage.classList.remove("hide");
-      imageId.src = socketData.path + '?' + Date.now();
+      imageId.src = socketData.path+'?'+Date.now();
       elementVideo.classList.add("hide");
       elementMap.classList.add("hide");
     } else if (workflowName == "fda") {
@@ -182,6 +182,7 @@
   ws.onmessage = function (e) {
     var para = document.createElement("p");
     //global datasource
+    console.log(e.data)
     console.log("Received: '" + JSON.parse(e.data) + "'");
     socketData = JSON.parse(e.data);
 
