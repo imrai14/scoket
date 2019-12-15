@@ -103,10 +103,12 @@
 
     let text = document.createTextNode(x);
 
+    // divPanelBody.innerHTML("<pre> <code>"+text+"</pre> </code>");
     divPanelBody.appendChild(text);
 
     var element = document.getElementById("divi");
     element.prepend(divPanel);
+    showContentsOnRunTime(x)
   }
 
   function showContentsOnRunTime(workflowName) {
@@ -121,26 +123,35 @@
       elementMap.classList.remove("hide");
       elementVideo.classList.add("hide");
       elementPacking.classList.add("hide");
+      dynamicImage.classList.add("hide");
     } else if (workflowName === 'Peel') {
       elementVideo.classList.remove("hide");
       document.getElementById('vid').play();
       elementMap.classList.add("hide");
       elementPacking.classList.add("hide");
+      dynamicImage.classList.add("hide");
+
 
     } else if (workflowName === 'Package') {
       elementPacking.classList.remove("hide");
       elementVideo.classList.add("hide");
       elementMap.classList.add("hide");
-    } else if (workflowName === 'Mangos') {
-      elementPacking.classList.remove("hide");
+      dynamicImage.classList.add("hide");
+
+    } else if (workflowName === 'Mangos' || workflowName === 'Graph' || workflowName === 'Land' || workflowName ===
+      'Farmer' || workflowName === 'StorePackage') {
+      dynamicImage.classList.remove("hide");
+      imageId.src = socketData.path + '?' + Date.now();
       elementVideo.classList.add("hide");
       elementMap.classList.add("hide");
     } else if (workflowName == "fda") {
       elementPacking.classList.add("hide");
       elementVideo.classList.add("hide");
       elementMap.classList.remove("hide");
-    }
-    else {
+      elementPacking.classList.add("hide");
+    } else if (workflowName === 'Refresh') {
+      window.location.reload();
+    } else {
       console.log('something error')
     }
   }
@@ -150,8 +161,6 @@
     var x = document.getElementById("someInput").value;
     // console.log('x', JSON.parse(x))
     createUIDynamically(x)
-
-
 
     ws.send(x);
   }

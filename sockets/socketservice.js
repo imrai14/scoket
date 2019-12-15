@@ -223,3 +223,13 @@ app.post('/updateUI', (req, res) => {
     //         res.write('<h1>Voila</h1><br /><br />This api was called ' + req.url);
     //         res.end();    
 });
+
+app.get('/clearsocketdata', (req, res)=>{
+    connection.send(JSON.stringify({"workflow": "Refresh"}));
+    return res.send({message:"OK"});
+})
+
+app.get('/storepackage', (req, res)=>{
+    connection.send(JSON.stringify({"workflow": "StorePackage"}));
+    return res.send({message:"OK"});
+})
