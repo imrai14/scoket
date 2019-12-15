@@ -5,6 +5,7 @@ const express = require('express');
 const WebSocketServer = require('websocket').server;
 const bodyParser = require('body-parser')
 const randomlocation = require('random-location');
+const coordinateJson = require('./data.json')
 const axios = require('axios')
 
 const url = require('url');
@@ -19,8 +20,11 @@ server.listen(9898, () => {
 
 
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json({"limit":"100mb"} ));
-
+app.use(bodyParser.json({ "limit": "100mb" }));
+startAllCoordinate = {
+    latitude: 37.7768006,
+    longitude: -122.4187928
+}
 const wsServer = new WebSocketServer({
     httpServer: server
 });
@@ -60,27 +64,38 @@ app.get('/dispatch', (req, res) => {
     startTime = new Date();
     temperature = 10.0;
     count = 100;
+    coordinateCount = 0;
     destinationReached = false;
+    startCoordinate = {"latitude": coordinateJson.Sheet1[coordinateCount].Latitude,
+                        "longitude": coordinateJson.Sheet1[coordinateCount].Longitude};
+    console.log('before sleep'+startCoordinate);
 
-    startCoordinate = {
-        latitude: 37.7768006,
-        longitude: -122.4187928
-    }
-
+startingCoordinate = 'true';
     interval = setInterval(() => {
-        dispatch(temperature, startCoordinate);
+        coordinateCount++;
+        dispatch(temperature, startCoordinate,startingCoordinate);
+        startingCoordinate = false;
         const R = 500 // meters           
-        startCoordinate = randomlocation.randomCirclePoint(startCoordinate, R);
+        if(coordinateCount === coordinateJson.Sheet1.length -1){
+            if (interval !== undefined) {
+                clearInterval(interval);
+            }
+        }else{
+            console.log("count"+ coordinateCount);
+        startCoordinate = {"latitude": coordinateJson.Sheet1[coordinateCount].Latitude,
+        "longitude": coordinateJson.Sheet1[coordinateCount].Longitude};
+       console.log('aftersleep'+startCoordinate);
         temperature = calculateTemperature(temperature);
+        }
 
-    }, 2000);
+    }, 1000);
     res.write('<h1>Voila</h1><br /><br />This api was called ' + req.url);
     res.end();
 });
 
 
 app.get('/pealandpackage', (req, res) => {
-    if(interval !== undefined){
+    if (interval !== undefined) {
         clearInterval(interval);
     }
     connection.send(JSON.stringify({ "workflow": "Peel" }));
@@ -89,111 +104,133 @@ app.get('/pealandpackage', (req, res) => {
 });
 
 app.get('/package', (req, res) => {
-    connection.send(JSON.stringify({ "Packets":200 , "Packet Quantity": 200,"Source": "Silkboard","Destination":"Siemens Kalwa Works", "workflow": "Package" }));
+    connection.send(JSON.stringify({ "Packets": 200, "Packet Quantity": 200, "Source": "Silkboard", "Destination": "Siemens Kalwa Works", "workflow": "Package" }));
     res.end();
 });
 
 var virusAffected = {
-    workflow:"fda",
-    "startingFarm" : {"latitude":24.879999 , "longitude":74.629997},
-    "citieswithinfectedFarm":10,
-    "packagessold":2000,
-    "packageavaialble":1500,
-    "virus":"Zika",
-    "infectionSite": {latitude:28.440554,longitude:74.493011},
-    "shops" : 
-    [
-        {shop: "Store 1",latitude: 16.994444, longitude:73.300003,sold: 200,contact:98861098947},
-        {shop: "Store 2",latitude: 19.155001,longitude:72.849998,sold: 200,contact:98861098947},
-        {shop: "Store 5",latitude: 28.610001,longitude:77.230003,sold: 200,contact:98861098947},
-        {shop: "Store 6",latitude: 19.07609,longitude:72.877426,sold: 200,contact:98861098947},
-        {shop: "Store 7",latitude: 14.16704,longitude:75.040298,sold: 200,contact:98861098947},
-        {shop: "Store 8",latitude: 26.540457,longitude:88.719391,sold: 200,contact:98861098947},
-        {shop: "Store 9",latitude: 24.633568,longitude:87.849251,sold: 200,contact:98861098947},
-    
-    ]
+    workflow: "fda",
+    "startingFarm": { "latitude": 24.879999, "longitude": 74.629997 },
+    "citieswithinfectedFarm": 10,
+    "packagessold": 2000,
+    "packageavaialble": 1500,
+    "virus": "Zika",
+    "infectionSite": { latitude: 28.440554, longitude: 74.493011 },
+    "shops":
+        [
+            { shop: "Store 1", latitude: 16.994444, longitude: 73.300003, sold: 200, contact: 98861098947 },
+            { shop: "Store 2", latitude: 19.155001, longitude: 72.849998, sold: 200, contact: 98861098947 },
+            { shop: "Store 5", latitude: 28.610001, longitude: 77.230003, sold: 200, contact: 98861098947 },
+            { shop: "Store 6", latitude: 19.07609, longitude: 72.877426, sold: 200, contact: 98861098947 },
+            { shop: "Store 7", latitude: 14.16704, longitude: 75.040298, sold: 200, contact: 98861098947 },
+            { shop: "Store 8", latitude: 26.540457, longitude: 88.719391, sold: 200, contact: 98861098947 },
+            { shop: "Store 9", latitude: 24.633568, longitude: 87.849251, sold: 200, contact: 98861098947 },
+
+        ]
 }
 
 app.post('/fda', (req, res) => {
-
+    if (interval !== undefined) {
+        clearInterval(interval);
+    }
     connection.send(JSON.stringify(virusAffected));
     res.end();
 
 });
 
 app.post('/customer', (req, res) => {
-
-    connection.send(JSON.stringify(req.body));
+    if (interval !== undefined) {
+        clearInterval(interval);
+    }
+    var totalObject = req.body;
+    totalObject.trackLogisticStatus = trackLogisticStatus;
+    totalObject.workflow = 'customer';
+    connection.send(JSON.stringify(totalObject));
     res.end();
 
 });
 
 app.post('/scanmango', (req, res) => {
     // console.log(JSON.stringify(req.body))
-     //var base64Data="iVBORw0KGgoAAAANSUhEUgAAAuAAAACFCAIAAACVGtqeAAAAA3NCSVQICAjb4U/gAAAAGXRFWHRTb2Z0d2FyZQBnbm9tZS1zY3JlZW5zaG907wO/PgAAIABJREFUeJzsnXc81d8fx9+fe695rYwIaa"
-     var base64Data = JSON.parse(JSON.stringify(req.body))
-     //console.log("string is:" + base64Data.str)
-     require("fs").writeFile("C:/Users/Z003YYZA/Desktop/F&B/Deployment_images/mangoimage.jpg", base64Data.str, 'base64', function (err) {
-         console.log("Error:" + err);
-     });
-     return res.send({message:"OK"}); 
- ;
- 
- });
- 
- app.post('/scanspectroimage', (req, res) => {
-     //console.log(JSON.stringify(req.body))
-     var base64Data = JSON.parse(JSON.stringify(req.body))
+    //var base64Data="iVBORw0KGgoAAAANSUhEUgAAAuAAAACFCAIAAACVGtqeAAAAA3NCSVQICAjb4U/gAAAAGXRFWHRTb2Z0d2FyZQBnbm9tZS1zY3JlZW5zaG907wO/PgAAIABJREFUeJzsnXc81d8fx9+fe695rYwIaa"
+    var base64Data = JSON.parse(JSON.stringify(req.body))
+    //console.log("string is:" + base64Data.str)
+    require("fs").writeFile("C:/Users/Z003YYZA/Desktop/F&B/Deployment_images/mangoimage.jpg", base64Data.str, 'base64', function (err) {
+        console.log("Error:" + err);
+    });
+    return res.send({ message: "OK" });
+    ;
+
+});
+
+app.post('/scanspectroimage', (req, res) => {
+    //console.log(JSON.stringify(req.body))
+    var base64Data = JSON.parse(JSON.stringify(req.body))
     // console.log("string is:" + base64Data.str)
-     require("fs").writeFile("C:/Users/Z003YYZA/Desktop/F&B/Deployment_images/spectrograph.jpg", base64Data.str, 'base64', function (err) {
-         console.log("Error:" + err);
-     });
-     return res.send({message:"OK"}); 
- ;
- });
+    require("fs").writeFile("C:/Users/Z003YYZA/Desktop/F&B/Deployment_images/spectrograph.jpg", base64Data.str, 'base64', function (err) {
+        console.log("Error:" + err);
+    });
+    return res.send({ message: "OK" });
+    ;
+});
 
 function calculateTemperature(temperature) {
-    if (temperature == 24)
+    if (temperature == 16)
         temperaturestate = 'maxToMin';
-    else if (temperature == 9)
+    else if (temperature == 8)
         temperaturestate = 'minToMax';
 
-    if (temperaturestate == 'MaxToMin')
+    if (temperaturestate == 'maxToMin')
         return --temperature;
-     return ++temperature;
-
- 
-     
+    return ++temperature;
 
 }
-
-function dispatch(temperature, startCoordinate) {
+var trackLogisticStatus = [];
+async function dispatch(temperature, coordinates,startingCoordinate) {
     let dispatchData = {}
     dispatchData['workflow'] = 'Dispatch';
-    dispatchData['coordinates'] = startCoordinate;
-    dispatchData['temperatureStatus'] = callPython(temperature);
+    dispatchData['coordinates'] = coordinates;
+    var pythonresponse= await callPython(temperature);
+    dispatchData['temperatureStatus'] = pythonresponse
+    console.log( dispatchData['temperatureStatus']);
     dispatchData['temperature'] = temperature;
     dispatchData['destinationReached'] = destinationReached;
 
+    var tempStorage = {};
+    tempStorage.coordinates = coordinates;
+    tempStorage.temperatureStatus = dispatchData['temperatureStatus'];
+    tempStorage.temperature = temperature;
+    tempStorage.isStartingCoordinate = startingCoordinate;
+    trackLogisticStatus.push(tempStorage);
     connection.send(JSON.stringify(dispatchData));
 }
+//Error', 'Warning', 'good
+async function callPython(temperature) {
 
-function callPython(temperature) {
- 
-console.log(temperature);
-    axios.post('https://172.20.10.3/status', {
+    // if(temperature>10 && temperature<12)
+    // return "good";
+    // if(temperature>8 && temperature<10)
+    // return "Warning";
+    // if(temperature>12 && temperature <14)
+    // return "Error";
+    var url = "https://172.20.10.3/status"
+    console.log('temperature'+ temperature);
+    var pythonresponse = await axios.post('http://132.186.90.201:8090/status', {
         temp: temperature
-      })
-      .then((res) => {
-        console.log(`statusCode: ${res.statusCode}`)
-        console.log(res);
-        return res;
-      })
-      .catch((error) => {
-        console.error(error)
-        return "Error reaching anamoly";
-      })
-     // return res;
+    });
+    return pythonresponse.data[0];
+        .then((res) => {
+            // console.log(`statusCode: ${res.statusCode}`)
+            // console.log(res);
+            console.log(res.data);
+            return res.data[0].toString();
+        })
+        .catch((error) => {
+            console.log('exception')
+            return "Error reaching anamoly";
+        })
+    return res;
+    console.log('method over');
 }
 
 app.get('/updateUI', (req, res) => {
@@ -224,12 +261,15 @@ app.post('/updateUI', (req, res) => {
     //         res.end();    
 });
 
-app.get('/clearsocketdata', (req, res)=>{
-    connection.send(JSON.stringify({"workflow": "Refresh"}));
-    return res.send({message:"OK"});
+app.get('/clearsocketdata', (req, res) => {
+    if (interval !== undefined) {
+        clearInterval(interval);
+    }
+    connection.send(JSON.stringify({ "workflow": "Refresh" }));
+    return res.send({ message: "OK" });
 })
 
-app.get('/storepackage', (req, res)=>{
-    connection.send(JSON.stringify({"workflow": "StorePackage"}));
-    return res.send({message:"OK"});
+app.get('/storepackage', (req, res) => {
+    connection.send(JSON.stringify({ "workflow": "StorePackage" }));
+    return res.send({ message: "OK" });
 })

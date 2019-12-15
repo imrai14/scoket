@@ -1,0 +1,204 @@
+﻿{
+    "Sheet1": [
+        {
+            "City": "Tumakuru",
+            "Latitude": "13.323347",
+            "Longitude": "77.108239"
+        },
+        {
+            "City": "Hindupur",
+            "Latitude": "13.777268",
+            "Longitude": "77.542005"
+        },
+        {
+            "City": "Koratagere",
+            "Latitude": "13.517037",
+            "Longitude": "77.227214"
+        },
+        {
+            "City": "madhugiri",
+            "Latitude": "13.653193",
+            "Longitude": "77.21184"
+        },
+        {
+            "City": "Sira",
+            "Latitude": "13.730848",
+            "Longitude": "76.908478"
+        },
+        {
+            "City": "Hiriyur",
+            "Latitude": "13.928203",
+            "Longitude": "76.618294"
+        },
+        {
+            "City": "Chitradurga",
+            "Latitude": "14.241357",
+            "Longitude": "76.396288"
+        },
+        {
+            "City": "Davanagere",
+            "Latitude": "14.494387",
+            "Longitude": "75.902811"
+        },
+        {
+            "City": "Harihara",
+            "Latitude": "14.511405",
+            "Longitude": "75.800134"
+        },
+        {
+            "City": "Ranebennur",
+            "Latitude": "14.601924",
+            "Longitude": "75.623334"
+        },
+        {
+            "City": "Kakola",
+            "Latitude": "14.66371",
+            "Longitude": "75.55946"
+        },
+        {
+            "City": "Motebennur",
+            "Latitude": "14.715452",
+            "Longitude": "75.494395"
+        },
+        {
+            "City": "Nelogalla",
+            "Latitude": "14.757487",
+            "Longitude": "75.440929"
+        },
+        {
+            "City": "Haveri",
+            "Latitude": "14.787032",
+            "Longitude": "75.399028"
+        },
+        {
+            "City": "Pune bangalore road junction",
+            "Latitude": "14.823544",
+            "Longitude": "75.369037"
+        },
+        {
+            "City": "Varadahalli",
+            "Latitude": "14.855105",
+            "Longitude": "75.325729"
+        },
+        {
+            "City": "Hosa kunimehalli",
+            "Latitude": "14.869208",
+            "Longitude": "75.318522"
+        },
+        {
+            "City": "Kitturu",
+            "Latitude": "15.593608",
+            "Longitude": "74.779896"
+        },
+        {
+            "City": "Hubli",
+            "Latitude": "15.714008",
+            "Longitude": "74.700945"
+        },
+        {
+            "City": "Kolikoppa",
+            "Latitude": "15.793046",
+            "Longitude": "74.596142"
+        },
+        {
+            "City": "Belagavi",
+            "Latitude": "15.855145",
+            "Longitude": "74.508084"
+        },
+        {
+            "City": "Gurenatti",
+            "Latitude": "15.98615",
+            "Longitude": "74.507656"
+        },
+        {
+            "City": "Hattharagi",
+            "Latitude": "16.131977",
+            "Longitude": "74.515549"
+        },
+        {
+            "City": "Gotur",
+            "Latitude": "16.229311",
+            "Longitude": "74.511292"
+        },
+        {
+            "City": "Nippani",
+            "Latitude": "16.39156",
+            "Longitude": "74.370942"
+        },
+        {
+            "City": "Satara",
+            "Latitude": "17.690082",
+            "Longitude": "74.030421"
+        },
+        {
+            "City": "Khandala",
+            "Latitude": "18.026143",
+            "Longitude": "74.010753"
+        },
+        {
+            "City": "Kikvi",
+            "Latitude": "18.197717",
+            "Longitude": "73.946781"
+        },
+        {
+            "City": "Nasarpur",
+            "Latitude": "18.249503",
+            "Longitude": "73.892983"
+        },
+        {
+            "City": "Katraj ghat",
+            "Latitude": "18.407697",
+            "Longitude": "73.845968"
+        },
+        {
+            "City": "Warje",
+            "Latitude": "18.478958",
+            "Longitude": "73.802798"
+        },
+        {
+            "City": "Chandani Chowk",
+            "Latitude": "18.506943",
+            "Longitude": "73.783461"
+        },
+        {
+            "City": "Balewadi",
+            "Latitude": "18.578439",
+            "Longitude": "73.762313"
+        },
+        {
+            "City": "Mumbai cricket ground",
+            "Latitude": "18.669795",
+            "Longitude": "73.704365"
+        },
+        {
+            "City": "Mumbai pune express way",
+            "Latitude": "18.702578",
+            "Longitude": "73.676054"
+        },
+        {
+            "City": "Malavli",
+            "Latitude": "18.741077",
+            "Longitude": "73.486186"
+        },
+        {
+            "City": "Lonavala",
+            "Latitude": "18.75135",
+            "Longitude": "73.40108"
+        },
+        {
+            "City": "Belapur east",
+            "Latitude": "19.027912",
+            "Longitude": "73.033704"
+        },
+        {
+            "City": "Nerul Flyover",
+            "Latitude": "19.047937",
+            "Longitude": "73.024027"
+        },
+        {
+            "City": "Navi Mumbai",
+            "Latitude": "19.029925",
+            "Longitude": "73.018063"
+        }
+    ]
+}

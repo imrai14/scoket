@@ -120,6 +120,7 @@
     let imageId = document.getElementById("imageId");
 
     if (workflowName === 'Dispatch') {
+      elementMap.classList.add("hide");
       elementMap.classList.remove("hide");
       elementVideo.classList.add("hide");
       elementPacking.classList.add("hide");
@@ -145,6 +146,12 @@
       elementVideo.classList.add("hide");
       elementMap.classList.add("hide");
     } else if (workflowName == "fda") {
+      elementMap.classList.add("hide");
+      elementPacking.classList.add("hide");
+      elementVideo.classList.add("hide");
+      elementMap.classList.remove("hide");
+      elementPacking.classList.add("hide");
+    } else if (workflowName == "customer") {
       elementPacking.classList.add("hide");
       elementVideo.classList.add("hide");
       elementMap.classList.remove("hide");
@@ -189,7 +196,7 @@
     // var element = document.getElementById("divi");
     // element.appendChild(para);
     loadFdaMap();
-
+    loadCustomerMap();
     loadDispatchPage();
   };
   //websocket end
@@ -197,25 +204,26 @@
 
 <script>
   //fdaWorkflow
+  var fdaMarker = [];
   function loadFdaMap() {
     console.log('fda map called')
     if (socketData !== undefined && socketData.workflow !== undefined && socketData.workflow === 'fda') {
-      // var head = document.getElementsByTagName('head')[0];
-      // var js = document.createElement("script");
-      // js.type = "text/javascript";
-      // js.src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyC_ZuqzDOlM1aapxFq_cmpKxftSdVvaOOc&callback=initMap";
-      // head.appendChild(js);
-      if(map === undefined){
+
+      if (map === undefined) {
         var googleLatLong = new google.maps.LatLng(socketData.startingFarm.latitude, socketData.startingFarm.longitude);
         map = new google.maps.Map(document.getElementById('map'), {
-              center: googleLatLong,
-              zoom: 5
-            });
+          center: googleLatLong,
+          zoom: 5
+        });
+      }
+      else {
+        map.setZoom(5);
       }
       for (let index = 0; index < socketData.shops.length; index++) {
         const shop = socketData.shops[index]
         var googleLatLong = new google.maps.LatLng(shop.latitude, shop.longitude);
         var marker = createMarker(googleLatLong, map, "S");
+        fdaMarker.push(marker);
         // var infowindow = new google.maps.InfoWindow({
         //   content: "name:" + shop.shop + '\b' + +"packages sold : " + shop.sold + '\b'
         // });
@@ -223,7 +231,8 @@
       }
 
       var googleLatLong = new google.maps.LatLng(socketData.startingFarm.latitude, socketData.startingFarm.longitude);
-      var originmarker =createMarker(googleLatLong, map, "O");
+      var originmarker = createMarker(googleLatLong, map, "O");
+      fdaMarker.push(originmarker);
       var infowindow = new google.maps.InfoWindow({
         content: "Source Farm location"
       });
@@ -231,6 +240,7 @@
 
       var googleLatLong = new google.maps.LatLng(socketData.infectionSite.latitude, socketData.infectionSite.longitude);
       var infectionMarker = createMarker(googleLatLong, map, "I");
+      fdaMarker.push(infectionMarker);
       var infowindow = new google.maps.InfoWindow({
         content: "virus diagnosed:" + "Zika"
       });
@@ -239,167 +249,231 @@
   }
 
   //load customer map
-
-  // function loadCustomerMap() {
-  //   if (socketData !== undefined && socketData.workflow !== undefined && socketData.workflow === 'customer') {
-  //     var head = document.getElementsByTagName('head')[0];
-  //     var js = document.createElement("script");
-  //     js.type = "text/javascript";
-  //     js.src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyC_ZuqzDOlM1aapxFq_cmpKxftSdVvaOOc&callback=initMap";
-  //     head.appendChild(js);
-
-  //     for (let index = 0; index < socketData.shops.length; index++) {
-  //       const shop = socketData.shops[i]
-  //       var googleLatLong = new google.maps.LatLng(shop.latitude, shop.longitude);
-  //       var marker = createMarker(googleLatLong, map, "S");
-  //       var infowindow = new google.maps.InfoWindow({
-  //         content: "name:" + shop.shop + '\b' + +"packages sold : " + shop.sold + '\b' + 'contact : ' + shop.contact
-  //       });
-  //       infowindow.open(map, marker);
-  //     }
-    
-  //   }
-  // }
-
-  //dispatch movable truck
-  var map;
-  var markerDispatchArray = [];
-  var markerDispatchCoordinates = [];
-
-  function loadDispatchPage() {
-    console.log('array' + markerDispatchArray.length);
-    console.log('workflow' + socketData.workflow);
-    if (socketData !== undefined && socketData.workflow === 'Dispatch') {
-      if (markerDispatchArray.length == 0) {
-        if (socketData !== undefined && socketData.coordinates !== undefined) {
-          var googleLatLong = new google.maps.LatLng(socketData.coordinates.latitude, socketData.coordinates.longitude);
-          if (markerDispatchArray.length == 0) {
-            map = new google.maps.Map(document.getElementById('map'), {
-              center: googleLatLong,
-              zoom: 15
-            });
-            marker = createMarker(googleLatLong, map, "G");
-          }
-        }
-        // var head = document.getElementsByTagName('head')[0];
-        // var js = document.createElement("script");
-        // js.type = "text/javascript";
-        // js.src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyC_ZuqzDOlM1aapxFq_cmpKxftSdVvaOOc&callback=initMap";
-        // head.appendChild(js);
-      } else {
-        var googleLatLong = new google.maps.LatLng(socketData.coordinates.latitude, socketData.coordinates.longitude);
-        if (socketData.temperatureStatus === 'Error') {
-          marker = createMarker(googleLatLong, map, "E");
-          var label = marker.getLabel();
-          label.color = "red";
-          label.text = "E";
-          marker.setLabel(label);
-          var infowindow = new google.maps.InfoWindow({
-            content: "error temp " + socketData.temperature
-          });
-          infowindow.open(map, marker);
-        } else if(socketData.temperatureStatus === 'Good') {
-          marker = createMarker(googleLatLong, map, "G");
-          var label = marker.getLabel();
-          console.log(label);
-          label.color = "white";
-          label.text = "G";
-          marker.setLabel(label);
-        }else if(socketData.temperatureStatus === 'Warning') {
-          marker = createMarker(googleLatLong, map, "W");
-          var label = marker.getLabel();
-          console.log(label);
-          label.color = "yellow";
-          label.text = "Y";
-          marker.setLabel(label);
-          var infowindow = new google.maps.InfoWindow({
-            content: "warning temp " + socketData.temperature
-          });
-        }
-
-
-        var flightPath = new google.maps.Polyline({
-          path: markerDispatchCoordinates,
-          strokeColor: "#FF0000",
-          strokeOpacity: 1.0,
-          strokeWeight: 2
+  var customerMarker = [];
+  var customerCoordinates = [];
+  function loadCustomerMap() {
+    console.log('customer map called')
+    if (socketData !== undefined && socketData.workflow !== undefined && socketData.workflow === 'customer') {
+      var logisticStatus = socketData.trackLogisticStatus;
+      if (map === undefined) {
+        const shop = logisticStatus[0];
+        console.log('shop'+shop);
+        var googleLatLong = new google.maps.LatLng(shop.coordinates.latitude, shop.coordinates.longitude);
+        map = new google.maps.Map(document.getElementById('map'), {
+          center: googleLatLong,
+          zoom: 10
         });
-        flightPath.setMap(map);
+      }
+      else {
+        console.log('else'+shop);
+
+        map.setZoom(10);
+      }
+      for (let index = 0; index < logisticStatus.length; index++) {
+        const shop = logisticStatus[index];
+       // console.log('sloophop'+shop);
+       // console.log('shop.isStartingCoordinate:'+shop.isStartingCoordinate);
+        if (shop.isStartingCoordinate === false) {
+          //console.log('starting coordinate'+shop);
+
+          var googleLatLong = new google.maps.LatLng(shop.coordinates.latitude, shop.coordinates.longitude);
+          customerCoordinates.push(googleLatLong);
+          var marker = createMarker(googleLatLong, map, "P");
+          customerMarker.push(marker);
+        } else {
+          var googleLatLong = new google.maps.LatLng(shop.coordinates.latitude, shop.coordinates.longitude);
+          var originmarker = createMarker(googleLatLong, map, "O");
+          customerMarker.push(originmarker);
+          customerCoordinates.push(googleLatLong);
+
+          var infowindow = new google.maps.InfoWindow({
+            content: "Source location"
+          });
+          infowindow.open(map, originmarker);
+        }
+
+        updateMarkerLabel(shop,googleLatLong);
+
+      }
+      var flightPath = new google.maps.Polyline({
+        path: customerCoordinates,
+        strokeColor: "#FF0000",
+        strokeOpacity: 1.0,
+        strokeWeight: 2
+      });
+      flightPath.setMap(map);
+    
+    }
+  }
+  function updateMarkerLabel(markerSource,googleLatLong){
+      if (markerSource.temperatureStatus === 'Error') {
+        marker = createMarker(googleLatLong, map, "E");
+        var label = marker.getLabel();
+        label.color = "red";
+        label.text = "E";
+        marker.setLabel(label);
+        var infowindow = new google.maps.InfoWindow({
+          content: "error temp " + markerSource.temperature
+        });
+        infowindow.open(map, marker);
+      } else if (markerSource.temperatureStatus === 'good') {
+        marker = createMarker(googleLatLong, map, "G");
+        var label = marker.getLabel();
+        console.log(label);
+        label.color = "white";
+        label.text = "G";
+        marker.setLabel(label);
+      } else if (markerSource.temperatureStatus === 'Warning') {
+        marker = createMarker(googleLatLong, map, "W");
+        var label = marker.getLabel();
+        console.log(label);
+        label.color = "yellow";
+        label.text = "Y";
+        marker.setLabel(label);
+        var infowindow = new google.maps.InfoWindow({
+          content: "warning temp " + markerSource.temperature
+        });
       }
     }
-  }
+    
 
-  function initMap() {
+      //dispatch movable truck
+      var map;
+      var markerDispatchArray = [];
+      var markerDispatchCoordinates = [];
 
-    console.log('init');
-    //might be needed later
-    // if (socketData !== undefined && socketData.coordinates !== undefined) {
-    //   var googleLatLong = new google.maps.LatLng(socketData.coordinates.latitude, socketData.coordinates.longitude);
-    //   if (markerDispatchArray.length == 0) {
-    //     map = new google.maps.Map(document.getElementById('map'), {
-    //       center: googleLatLong,
-    //       zoom: 15
-    //     });
-    //     marker = createMarker(googleLatLong, map, "G");
-    //   }
-    // }
-  }
+      function loadDispatchPage() {
+        console.log('array' + markerDispatchArray.length);
+        console.log('workflow' + socketData.workflow);
+        if (socketData !== undefined && socketData.workflow === 'Dispatch') {
+          console.log('temperaturestatus:' +socketData.temperatureStatus);
 
-  function createMarker(googleLatLong, map, label) {
-    var markerOptions = {
-      position: googleLatLong,
-      map: map,
-      clickable: true,
-      label: label
-    }
-    var marker = new google.maps.Marker(markerOptions);
-    //map.setCenter(googleLatLong);
-    markerDispatchArray.push(marker);
-    markerDispatchCoordinates.push(googleLatLong);
-    return marker;
-  }
+          if (markerDispatchArray.length == 0) {
+            if (socketData !== undefined && socketData.coordinates !== undefined) {
+              var googleLatLong = new google.maps.LatLng(socketData.coordinates.latitude, socketData.coordinates.longitude);
+              if (markerDispatchArray.length == 0) {
+                map = new google.maps.Map(document.getElementById('map'), {
+                  center: googleLatLong,
+                  zoom: 7
+                });
+                marker = createMarker(googleLatLong, map, "G");
+              }
+            }
+          } else {
+            var googleLatLong = new google.maps.LatLng(socketData.coordinates.latitude, socketData.coordinates.longitude);
+            console.log('temperaturestatus:' +socketData.temperatureStatus);
+            if (socketData.temperatureStatus === 'Error') {
+              marker = createMarker(googleLatLong, map, "E");
+              var label = marker.getLabel();
+              label.color = "red";
+              label.text = "E";
+              marker.setLabel(label);
+              var infowindow = new google.maps.InfoWindow({
+                content: "error temp " + socketData.temperature
+              });
+              infowindow.open(map, marker);
+            } else if (socketData.temperatureStatus === 'good') {
+              marker = createMarker(googleLatLong, map, "G");
+              var label = marker.getLabel();
+              console.log(label);
+              label.color = "white";
+              label.text = "G";
+              marker.setLabel(label);
+            } else if (socketData.temperatureStatus === 'Warning') {
+              marker = createMarker(googleLatLong, map, "W");
+              var label = marker.getLabel();
+              console.log(label);
+              label.color = "yellow";
+              label.text = "Y";
+              marker.setLabel(label);
+              var infowindow = new google.maps.InfoWindow({
+                content: "warning temp " + socketData.temperature
+              });
+            }
 
-  function loadStaticMap() {
-    var googleLatLong = new google.maps.LatLng(37.77629613961063, -122.41644409956226)
-    map = new google.maps.Map(document.getElementById('map'), {
-      center: googleLatLong,
-      zoom: 20
-    });
+
+            var flightPath = new google.maps.Polyline({
+              path: markerDispatchCoordinates,
+              strokeColor: "#FF0000",
+              strokeOpacity: 1.0,
+              strokeWeight: 2
+            });
+            flightPath.setMap(map);
+          }
+        }
+      }
+
+      function initMap() {
+
+        console.log('init');
+        //might be needed later
+        // if (socketData !== undefined && socketData.coordinates !== undefined) {
+        //   var googleLatLong = new google.maps.LatLng(socketData.coordinates.latitude, socketData.coordinates.longitude);
+        //   if (markerDispatchArray.length == 0) {
+        //     map = new google.maps.Map(document.getElementById('map'), {
+        //       center: googleLatLong,
+        //       zoom: 15
+        //     });
+        //     marker = createMarker(googleLatLong, map, "G");
+        //   }
+        // }
+      }
+
+      function createMarker(googleLatLong, map, label) {
+        var markerOptions = {
+          position: googleLatLong,
+          map: map,
+          clickable: true,
+          label: label
+        }
+        var marker = new google.maps.Marker(markerOptions);
+        //map.setCenter(googleLatLong);
+        markerDispatchArray.push(marker);
+        markerDispatchCoordinates.push(googleLatLong);
+        return marker;
+      }
+
+      function loadStaticMap() {
+        var googleLatLong = new google.maps.LatLng(37.77629613961063, -122.41644409956226)
+        map = new google.maps.Map(document.getElementById('map'), {
+          center: googleLatLong,
+          zoom: 20
+        });
 
 
 
-    var googleLatLong2 = new google.maps.LatLng(37.77629613961063, -122.41644409956226)
-    var markerOptions = {
-      position: googleLatLong2,
-      map: map,
-      clickable: true,
-      draggable: true
-    }
-    var marker = new google.maps.Marker(markerOptions);
+        var googleLatLong2 = new google.maps.LatLng(37.77629613961063, -122.41644409956226)
+        var markerOptions = {
+          position: googleLatLong2,
+          map: map,
+          clickable: true,
+          draggable: true
+        }
+        var marker = new google.maps.Marker(markerOptions);
 
-    var googleLatLong3 = new google.maps.LatLng(37.77924260798748, -122.41414432988985)
-    var markerOptions = {
-      position: googleLatLong3,
-      map: map,
-      clickable: true,
-      draggable: true
-    }
-    var marker = new google.maps.Marker(markerOptions);
+        var googleLatLong3 = new google.maps.LatLng(37.77924260798748, -122.41414432988985)
+        var markerOptions = {
+          position: googleLatLong3,
+          map: map,
+          clickable: true,
+          draggable: true
+        }
+        var marker = new google.maps.Marker(markerOptions);
 
-    // var googleLatLong4 = new google.maps.LatLng(-34.10397,150.32644)
-    // var markerOptions = {position:googleLatLong3,map:map,clickable:true,draggable:true}
-    // var marker = new google.maps.Marker(markerOptions);
+        // var googleLatLong4 = new google.maps.LatLng(-34.10397,150.32644)
+        // var markerOptions = {position:googleLatLong3,map:map,clickable:true,draggable:true}
+        // var marker = new google.maps.Marker(markerOptions);
 
-    var googleLatLong5 = new google.maps.LatLng(37.77413704276741, -122.41542682726455)
-    var markerOptions = {
-      position: googleLatLong5,
-      map: map,
-      clickable: true,
-      draggable: true
-    }
-    var marker = new google.maps.Marker(markerOptions);
+        var googleLatLong5 = new google.maps.LatLng(37.77413704276741, -122.41542682726455)
+        var markerOptions = {
+          position: googleLatLong5,
+          map: map,
+          clickable: true,
+          draggable: true
+        }
+        var marker = new google.maps.Marker(markerOptions);
 
-  }
+      }
 </script>
 
 
