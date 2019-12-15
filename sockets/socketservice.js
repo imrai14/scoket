@@ -219,18 +219,18 @@ async function callPython(temperature) {
         temp: temperature
     });
     return pythonresponse.data[0];
-        .then((res) => {
-            // console.log(`statusCode: ${res.statusCode}`)
-            // console.log(res);
-            console.log(res.data);
-            return res.data[0].toString();
-        })
-        .catch((error) => {
-            console.log('exception')
-            return "Error reaching anamoly";
-        })
-    return res;
-    console.log('method over');
+    //     .then((res) => {
+    //         // console.log(`statusCode: ${res.statusCode}`)
+    //         // console.log(res);
+    //         console.log(res.data);
+    //         return res.data[0].toString();
+    //     })
+    //     .catch((error) => {
+    //         console.log('exception')
+    //         return "Error reaching anamoly";
+    //     })
+    // return res;
+    // console.log('method over');
 }
 
 app.get('/updateUI', (req, res) => {
