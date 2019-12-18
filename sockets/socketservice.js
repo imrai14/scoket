@@ -133,6 +133,8 @@ app.post('/fda', (req, res) => {
     if (interval !== undefined) {
         clearInterval(interval);
     }
+    console.log('req.body',req.body)
+    virusAffected.body = req.body;
     connection.send(JSON.stringify(virusAffected));
     res.end();
 
@@ -142,7 +144,8 @@ app.post('/customer', (req, res) => {
     if (interval !== undefined) {
         clearInterval(interval);
     }
-    var totalObject = req.body;
+    var totalObject={};
+    totalObject.body = req.body;
     totalObject.trackLogisticStatus = trackLogisticStatus;
     totalObject.workflow = 'customer';
     connection.send(JSON.stringify(totalObject));
@@ -215,7 +218,7 @@ async function callPython(temperature) {
     // return "Error";
     var url = "https://172.20.10.3/status"
     console.log('temperature'+ temperature);
-    var pythonresponse = await axios.post('http://132.186.90.201:8090/status', {
+    var pythonresponse = await axios.post('http://172.20.10.3:8081/status', {
         temp: temperature
     });
     return pythonresponse.data[0];
@@ -270,7 +273,7 @@ app.get('/clearsocketdata', (req, res) => {
 })
 
 app.get('/storepackage', (req, res) => {
-    connection.send(JSON.stringify({ "workflow": "StorePackage" }));
+    connection.send(JSON.stringify({"workflow" : "StorePackage", "path": "C:\\Users\\Z003YYZA\\Desktop\\F&B\\Deployment_images\\package.png"}))
     return res.send({ message: "OK" });
 })
 
